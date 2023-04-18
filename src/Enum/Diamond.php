@@ -23,6 +23,10 @@ enum Diamond: int implements Suite
 
     public function toString(): string
     {
+        if ($this->value > 1 && $this->value < 11) {
+            return $this->value . ' of Diamonds';
+        }
+
         return $this->name . ' of Diamonds';
     }
 

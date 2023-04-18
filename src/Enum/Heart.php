@@ -23,6 +23,10 @@ enum Heart: int implements Suite
 
     public function toString(): string
     {
+        if ($this->value > 1 && $this->value < 11) {
+            return $this->value . ' of Hearts';
+        }
+
         return $this->name . ' of Hearts';
     }
 
