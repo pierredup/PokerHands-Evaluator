@@ -14,5 +14,7 @@
             "email": "pierre@pcservice.co.za"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=8.2"
+    }
 }
