@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace Rsaweb\Poker\Contracts;
 
-interface Suite
+use BackedEnum;
+
+interface Suite extends BackedEnum
 {
     public function toString(): string;
     public function toShortString(): string;
