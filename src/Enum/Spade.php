@@ -20,4 +20,18 @@ enum Spade: int implements Suite
     case Jack = 11;
     case Queen = 12;
     case King = 13;
+
+    public function toString(): string
+    {
+        return $this->name . ' of Spades';
+    }
+
+    public function toShortString(): string
+    {
+        if ($this->value > 1 && $this->value < 11) {
+            return $this->value . 'S';
+        }
+
+        return $this->name[0] . 'S';
+    }
 }

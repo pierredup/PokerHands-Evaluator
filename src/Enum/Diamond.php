@@ -20,4 +20,18 @@ enum Diamond: int implements Suite
     case Jack = 11;
     case Queen = 12;
     case King = 13;
+
+    public function toString(): string
+    {
+        return $this->name . ' of Diamonds';
+    }
+
+    public function toShortString(): string
+    {
+        if ($this->value > 1 && $this->value < 11) {
+            return $this->value . 'D';
+        }
+
+        return $this->name[0] . 'D';
+    }
 }

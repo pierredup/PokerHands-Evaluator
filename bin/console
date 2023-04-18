@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+
+<?php
+
+use Rsaweb\Poker\Console\Command\EvaluateCommand;
+use Symfony\Component\Console\Application;
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+$application = new Application();
+$command = new EvaluateCommand();
+
+$application->add($command);
+
+$application
+    ->setDefaultCommand($command->getName(), true)
+    ->run();
