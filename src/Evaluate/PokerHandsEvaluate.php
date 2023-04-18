@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Rsaweb\Poker\Evaluate;
 
 use Rsaweb\Poker\Contracts\Suite;
+use Rsaweb\Poker\Enum\PokerHands;
 use function array_map;
 use function in_array;
 
@@ -93,6 +94,22 @@ final class PokerHandsEvaluate
     public function hasFlush(): bool
     {
         return count(array_unique(array_map(static fn (Suite $suite) => $suite::class, $this->suites))) === 1;
+    }
+
+    public function getHighestRank(): PokerHands
+    {
+        return match(true) {
+            $this->hasRoyalFlush() => PokerHands::RoyalFlush,
+            $this->hasStraightFlush() => PokerHands::StraightFlush,
+            $this->hasFourOfAKind() => PokerHands::FourOfAKind,
+            $this->hasFullHouse() => PokerHands::FullHouse,
+            $this->hasFlush() => PokerHands::Flush,
+            $this->hasStraight() => PokerHands::Straight,
+            $this->hasThreeOfAKind() => PokerHands::ThreeOfAKind,
+            $this->hasTwoPair() => PokerHands::TwoPair,
+            $this->hasOnePair() => PokerHands::OnePair,
+            default => PokerHands::HighCard,
+        };
     }
 
     private function hasAce(): bool

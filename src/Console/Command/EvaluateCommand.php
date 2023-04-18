@@ -8,6 +8,7 @@ use Rsaweb\Poker\Enum\Club;
 use Rsaweb\Poker\Enum\Diamond;
 use Rsaweb\Poker\Enum\Heart;
 use Rsaweb\Poker\Enum\Spade;
+use Rsaweb\Poker\Evaluate\PokerHandsEvaluate;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -96,7 +97,14 @@ HELP)
             return self::FAILURE;
         }
 
-        $this->io->success('You chose the following cards:');
+        $evaluate = new PokerHandsEvaluate(
+            ...array_map(
+                fn(string $suite) => $this->allSuites[$suite],
+                $input->getArgument('suites')
+            )
+        );
+
+        $this->io->title('You chose the following cards:');
 
         $this->io->listing(
             array_map(
@@ -104,6 +112,9 @@ HELP)
                 $input->getArgument('suites')
             )
         );
+
+        $this->io->title('The highest hand you have is:');
+        $this->io->block($evaluate->getHighestRank()->toString());
 
         return self::SUCCESS;
     }

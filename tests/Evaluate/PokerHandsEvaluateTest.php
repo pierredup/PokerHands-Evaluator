@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace Rsaweb\Poker\Tests\Evaluate;
 
-use Directory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Rsaweb\Poker\Enum\Club;
 use Rsaweb\Poker\Enum\Diamond;
 use Rsaweb\Poker\Enum\Heart;
+use Rsaweb\Poker\Enum\PokerHands;
 use Rsaweb\Poker\Enum\Spade;
 use Rsaweb\Poker\Evaluate\PokerHandsEvaluate;
 use PHPUnit\Framework\TestCase;
@@ -221,5 +222,137 @@ final class PokerHandsEvaluateTest extends TestCase
         );
 
         self::assertFalse($evaluate->hasOnePair());
+    }
+
+    #[DataProvider('provideHighestRankData')]
+    public function testGetHighestRank(array $suites, PokerHands $hand): void
+    {
+        $evaluate = new PokerHandsEvaluate(...$suites);
+
+        self::assertEquals($hand, $evaluate->getHighestRank());
+    }
+
+    public static function provideHighestRankData(): iterable
+    {
+        yield 'Royal Flush' => [
+            [
+                Club::Ace,
+                Club::King,
+                Club::Queen,
+                Club::Jack,
+                Club::Ten,
+            ],
+            PokerHands::RoyalFlush,
+        ];
+
+        yield 'Straight Flush' => [
+            [
+                Club::King,
+                Club::Queen,
+                Club::Jack,
+                Club::Ten,
+                Club::Nine,
+            ],
+            PokerHands::StraightFlush,
+        ];
+
+        yield 'Four of a Kind' => [
+            [
+                Club::Five,
+                Diamond::Five,
+                Heart::Five,
+                Spade::Five,
+                Club::Ten,
+            ],
+            PokerHands::FourOfAKind,
+        ];
+
+        yield 'Full House' => [
+            [
+                Spade::Six,
+                Heart::Six,
+                Diamond::Six,
+                Club::King,
+                Heart::King,
+            ],
+            PokerHands::FullHouse,
+        ];
+
+        yield 'Flush' => [
+            [
+                Diamond::Jack,
+                Diamond::Nine,
+                Diamond::Eight,
+                Diamond::Four,
+                Diamond::Three,
+            ],
+            PokerHands::Flush,
+        ];
+
+        yield 'Straight' => [
+            [
+                Diamond::Ten,
+                Spade::Nine,
+                Heart::Eight,
+                Diamond::Seven,
+                Club::Six,
+            ],
+            PokerHands::Straight,
+        ];
+
+        yield 'Three of a Kind' => [
+            [
+                Club::Queen,
+                Spade::Queen,
+                Heart::Queen,
+                Heart::Nine,
+                Spade::Two,
+            ],
+            PokerHands::ThreeOfAKind,
+        ];
+
+        yield 'Two Pair' => [
+            [
+                Heart::Jack,
+                Spade::Jack,
+                Club::Three,
+                Spade::Three,
+                Heart::Two,
+            ],
+            PokerHands::TwoPair,
+        ];
+
+        yield 'One Pair' => [
+            [
+                Spade::Ten,
+                Heart::Ten,
+                Spade::Eight,
+                Heart::Seven,
+                Club::Four,
+            ],
+            PokerHands::OnePair,
+        ];
+
+        yield 'High Card' => [
+            [
+                Spade::Ten,
+                Heart::Nine,
+                Spade::Eight,
+                Heart::Seven,
+                Club::Four,
+            ],
+            PokerHands::HighCard,
+        ];
+
+        yield 'High Card Ace' => [
+            [
+                Spade::Ace,
+                Heart::Nine,
+                Spade::Eight,
+                Heart::Seven,
+                Club::Four,
+            ],
+            PokerHands::HighCard,
+        ];
     }
 }
