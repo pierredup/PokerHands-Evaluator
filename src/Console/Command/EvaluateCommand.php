@@ -9,6 +9,9 @@ use Rsaweb\Poker\Enum\Diamond;
 use Rsaweb\Poker\Enum\Heart;
 use Rsaweb\Poker\Enum\Spade;
 use Rsaweb\Poker\Evaluate\PokerHandsEvaluate;
+use Rsaweb\Poker\Exception\InvalidCardException;
+use Rsaweb\Poker\Exception\NonUniqueCardsException;
+use Rsaweb\Poker\Validator\PokerHandValidator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,17 +20,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use function array_combine;
-use function array_count_values;
-use function array_diff;
 use function array_diff_key;
 use function array_flip;
-use function array_intersect;
-use function array_keys;
 use function array_map;
 use function array_merge;
-use function array_unique;
 use function count;
-use function implode;
 use function sprintf;
 
 #[AsCommand(
@@ -36,8 +33,6 @@ use function sprintf;
 )]
 final class EvaluateCommand extends Command
 {
-    private const MAX_CARDS = 5;
-
     private readonly SymfonyStyle $io;
 
     /**
@@ -48,16 +43,9 @@ final class EvaluateCommand extends Command
      */
     private array $allSuites;
 
-    /**
-     * List of all the suite shorthand keys for easier reference
-     *
-     * @var string[]
-     */
-    private array $suiteKeys;
-
     protected function configure(): void
     {
-        $maxCards = self::MAX_CARDS;
+        $maxCards = PokerHandValidator::MAX_CARDS;
 
         $this
             ->setHelp(<<<HELP
@@ -87,13 +75,19 @@ HELP)
             Club::cases(),
         );
 
-        $this->suiteKeys = array_map(static fn(Suite $suite) => $suite->toShortString(), $suites);
-        $this->allSuites = array_combine($this->suiteKeys, $suites);
+        $this->allSuites = array_combine(
+            array_map(static fn(Suite $suite) => $suite->toShortString(), $suites),
+            $suites
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$this->validateInput($input->getArgument('suites'))) {
+        try {
+            PokerHandValidator::validate(...$input->getArgument('suites'));
+        } catch (NonUniqueCardsException | InvalidCardException $e) {
+            $this->io->error($e->getMessage());
+
             return self::FAILURE;
         }
 
@@ -123,7 +117,7 @@ HELP)
     {
         $options = $input->getArgument('suites');
 
-        if (count($options) > self::MAX_CARDS) {
+        if (count($options) > PokerHandValidator::MAX_CARDS) {
             return;
         }
 
@@ -133,7 +127,7 @@ HELP)
             array_flip($options)
         );
 
-        while (count($options) !== self::MAX_CARDS) {
+        while (count($options) !== PokerHandValidator::MAX_CARDS) {
             $options = [
                 ...$options,
                 ...$this->io->askQuestion(
@@ -145,10 +139,10 @@ HELP)
                 ),
             ];
 
-            if (count($options) > self::MAX_CARDS) {
-                $this->io->warning(sprintf('You chose more than %1$d cards. Only the first %1$d will be used.', self::MAX_CARDS));
+            if (count($options) > PokerHandValidator::MAX_CARDS) {
+                $this->io->warning(sprintf('You chose more than %1$d cards. Only the first %1$d will be used.', PokerHandValidator::MAX_CARDS));
 
-                $options = array_slice($options, 0, self::MAX_CARDS);
+                $options = array_slice($options, 0, PokerHandValidator::MAX_CARDS);
                 break;
             }
 
@@ -157,30 +151,5 @@ HELP)
         }
 
         $input->setArgument('suites', $options);
-    }
-
-    private function validateInput(array $suites): bool
-    {
-        if (count(array_intersect($suites, $this->suiteKeys)) !== self::MAX_CARDS) {
-            // Get list of all invalid cards
-            $invalidCards = array_diff($suites, $this->suiteKeys);
-
-            $this->io->error(sprintf('You must choose %d valid cards. The following cards are invalid: %s', self::MAX_CARDS, implode(', ', $invalidCards)));
-            return false;
-        }
-
-        if (count(array_unique($suites)) !== self::MAX_CARDS) {
-            $duplicateCards = array_keys(
-                array_filter(
-                    array_count_values($suites),
-                    static fn(int $value) => $value > 1
-                )
-            );
-
-            $this->io->error(sprintf('You must choose %d unique cards. The following cards are duplicated: %s', self::MAX_CARDS, implode(', ', $duplicateCards)));
-            return false;
-        }
-
-        return true;
     }
 }
