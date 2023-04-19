@@ -6,7 +6,7 @@ namespace Rsaweb\Poker\Exception;
 use RuntimeException;
 use Throwable;
 
-final class InvalidCardException extends RuntimeException
+final class InvalidCardException extends RuntimeException implements PokerHandsException
 {
     public function __construct(array $invalidCards, int $code = 0, Throwable $previous = null)
     {

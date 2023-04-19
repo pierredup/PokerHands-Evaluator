@@ -6,7 +6,7 @@ namespace Rsaweb\Poker\Exception;
 use RuntimeException;
 use Throwable;
 
-final class NonUniqueCardsException extends RuntimeException
+final class NonUniqueCardsException extends RuntimeException implements PokerHandsException
 {
     public function __construct(array $duplicateCards, int $code = 0, Throwable $previous = null)
     {
