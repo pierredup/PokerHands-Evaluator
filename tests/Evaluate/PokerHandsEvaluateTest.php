@@ -225,9 +225,9 @@ final class PokerHandsEvaluateTest extends TestCase
     }
 
     #[DataProvider('provideHighestRankData')]
-    public function testGetHighestRank(array $suites, PokerHands $hand): void
+    public function testGetHighestRank(array $cards, PokerHands $hand): void
     {
-        $evaluate = new PokerHandsEvaluate(...$suites);
+        $evaluate = new PokerHandsEvaluate(...$cards);
 
         self::assertEquals($hand, $evaluate->getHighestRank());
     }

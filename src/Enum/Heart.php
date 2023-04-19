@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Rsaweb\Poker\Enum;
 
-use Rsaweb\Poker\Contracts\Suite;
+use Rsaweb\Poker\Contracts\Card;
 
-enum Heart: int implements Suite
+enum Heart: int implements Card
 {
     case Ace = 1;
     case Two = 2;

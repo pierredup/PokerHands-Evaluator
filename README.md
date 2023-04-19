@@ -41,12 +41,12 @@ E.G using the built-in PHP webserver:
 php -S 127.0.0.1:8000 public/index.php
 ```
 
-Then send a POST request to `http://127.0.0.1:8000/api` with the following body format: `{"suites": ['array of cards']}`
+Then send a POST request to `http://127.0.0.1:8000/api` with the following body format: `{"cards": ['array of cards']}`
 
 E.G
 
 ```bash
-curl -X POST -d '{"suites": ["2H", "3D", "5S", "9C", "KD"]}' http://127.0.0.1:8000/api
+curl -X POST -d '{"cards": ["2H", "3D", "5S", "9C", "KD"]}' http://127.0.0.1:8000/api
 ```
 
 This will return a JSON response with a `rank` key which contains the rank of the hand.

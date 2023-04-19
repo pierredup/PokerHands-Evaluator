@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Rsaweb\Poker\Evaluate;
 
-use Rsaweb\Poker\Contracts\Suite;
+use Rsaweb\Poker\Contracts\Card;
 use Rsaweb\Poker\Enum\PokerHands;
 use function array_map;
 use function in_array;
@@ -11,47 +11,47 @@ use function in_array;
 final class PokerHandsEvaluate
 {
     /**
-     * @var Suite[]
+     * @var Card[]
      */
-    private array $suites;
+    private array $cards;
 
     /**
-     * A map of the suite values and the number of times they appear in the hand
+     * A map of the card values and the number of times they appear in the hand
      *
      * @var array<string, int>
      */
-    private array $suiteCount;
+    private array $cardCount;
 
-    public function __construct(Suite ...$suites)
+    public function __construct(Card ...$card)
     {
-        $this->suites = $suites;
+        $this->cards = $card;
 
-        $this->suiteCount = array_count_values(
+        $this->cardCount = array_count_values(
             array_map(
-                static fn (Suite $suite) => $suite->value,
-                $suites
+                static fn (Card $card) => $card->value,
+                $card
             )
         );
     }
 
     public function hasOnePair(): bool
     {
-        return in_array(2, $this->suiteCount, true);
+        return in_array(2, $this->cardCount, true);
     }
 
     public function hasTwoPair(): bool
     {
-        return count(array_keys($this->suiteCount, 2, true)) === 2;
+        return count(array_keys($this->cardCount, 2, true)) === 2;
     }
 
     public function hasThreeOfAKind(): bool
     {
-        return in_array(3, $this->suiteCount, true);
+        return in_array(3, $this->cardCount, true);
     }
 
     public function hasFourOfAKind(): bool
     {
-        return in_array(4, $this->suiteCount, true);
+        return in_array(4, $this->cardCount, true);
     }
 
     public function hasFullHouse(): bool
@@ -61,15 +61,15 @@ final class PokerHandsEvaluate
 
     public function hasStraight(): bool
     {
-        $suiteValues = array_map(static fn (Suite $suite) => $suite->value, $this->suites);
+        $cardValues = array_map(static fn (Card $card) => $card->value, $this->cards);
 
-        $isStraight = count(array_diff(range(min($suiteValues), max($suiteValues)), $suiteValues)) === 0;
+        $isStraight = count(array_diff(range(min($cardValues), max($cardValues)), $cardValues)) === 0;
 
         if  (false === $isStraight && $this->hasAce()) {
             // Handle a straight with an ace, E.G 10, J, Q, K, A
-            $suiteValues = array_map(static fn (Suite $suite) => $suite->value === 1 ? 14 : $suite->value, $this->suites);
+            $cardValues = array_map(static fn (Card $card) => $card->value === 1 ? 14 : $card->value, $this->cards);
 
-            return count(array_diff(range(min($suiteValues), max($suiteValues)), $suiteValues)) === 0;
+            return count(array_diff(range(min($cardValues), max($cardValues)), $cardValues)) === 0;
         }
 
         return $isStraight;
@@ -86,14 +86,14 @@ final class PokerHandsEvaluate
             return false;
         }
 
-        $suiteValues = array_map(static fn (Suite $suite) => $suite->value === 1 ? 14 : $suite->value, $this->suites);
+        $cardValues = array_map(static fn (Card $card) => $card->value === 1 ? 14 : $card->value, $this->cards);
 
-        return $this->hasStraightFlush() && count(array_diff([10, 11, 12, 13, 14], $suiteValues)) === 0;
+        return $this->hasStraightFlush() && count(array_diff([10, 11, 12, 13, 14], $cardValues)) === 0;
     }
 
     public function hasFlush(): bool
     {
-        return count(array_unique(array_map(static fn (Suite $suite) => $suite::class, $this->suites))) === 1;
+        return count(array_unique(array_map(static fn (Card $card) => $card::class, $this->cards))) === 1;
     }
 
     public function getHighestRank(): PokerHands
@@ -114,6 +114,6 @@ final class PokerHandsEvaluate
 
     private function hasAce(): bool
     {
-        return in_array(1, array_map(static fn (Suite $suite) => $suite->value, $this->suites), true);
+        return in_array(1, array_map(static fn (Card $card) => $card->value, $this->cards), true);
     }
 }

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Rsaweb\Poker\Validator;
 
-use Rsaweb\Poker\Contracts\Suite;
+use Rsaweb\Poker\Contracts\Card;
 use Rsaweb\Poker\Enum\Club;
 use Rsaweb\Poker\Enum\Diamond;
 use Rsaweb\Poker\Enum\Heart;
@@ -38,30 +38,30 @@ final class PokerHandValidator
     /**
      * @throws InvalidCardException|NonUniqueCardsException
      */
-    public static function validate(Suite|string ...$suites): void
+    public static function validate(Card|string ...$cards): void
     {
-        $allSuites = array_merge(
+        $allCards = array_merge(
             Spade::cases(),
             Diamond::cases(),
             Heart::cases(),
             Club::cases(),
         );
 
-        $suiteKeys = array_map(static fn(Suite $suite) => $suite->toShortString(), $allSuites);
+        $cardKeys = array_map(static fn(Card $card) => $card->toShortString(), $allCards);
 
-        $totalSuiteCount = count($suites);
+        $totalCardCount = count($cards);
 
-        if (is_string(current($suites)) && count(array_intersect($suites, $suiteKeys)) !== $totalSuiteCount) {
+        if (is_string(current($cards)) && count(array_intersect($cards, $cardKeys)) !== $totalCardCount) {
             // Get list of all invalid cards
-            $invalidCards = array_diff($suites, $suiteKeys);
+            $invalidCards = array_diff($cards, $cardKeys);
 
             throw new InvalidCardException($invalidCards);
         }
 
-        if (count(array_unique($suites)) !== $totalSuiteCount) {
+        if (count(array_unique($cards)) !== $totalCardCount) {
             $duplicateCards = array_keys(
                 array_filter(
-                    array_count_values($suites),
+                    array_count_values($cards),
                     static fn(int $value) => $value > 1
                 )
             );
@@ -69,8 +69,8 @@ final class PokerHandValidator
             throw new NonUniqueCardsException($duplicateCards);
         }
 
-        if ($totalSuiteCount !== self::MAX_CARDS) {
-            throw new InvalidNumberOfCards(self::MAX_CARDS, $totalSuiteCount);
+        if ($totalCardCount !== self::MAX_CARDS) {
+            throw new InvalidNumberOfCards(self::MAX_CARDS, $totalCardCount);
         }
     }
 }

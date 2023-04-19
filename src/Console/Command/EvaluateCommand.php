@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace Rsaweb\Poker\Console\Command;
 
-use Rsaweb\Poker\Contracts\Suite;
+use Rsaweb\Poker\Contracts\Card;
 use Rsaweb\Poker\Enum\Club;
 use Rsaweb\Poker\Enum\Diamond;
 use Rsaweb\Poker\Enum\Heart;
 use Rsaweb\Poker\Enum\Spade;
 use Rsaweb\Poker\Evaluate\PokerHandsEvaluate;
 use Rsaweb\Poker\Exception\PokerHandsException;
-use Rsaweb\Poker\Transformer\ShortStringToSuiteTransformer;
+use Rsaweb\Poker\Transformer\ShortStringToCardTransformer;
 use Rsaweb\Poker\Transformer\TransformerInterface;
 use Rsaweb\Poker\Validator\PokerHandValidator;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -36,7 +36,7 @@ final class EvaluateCommand extends Command
 {
     private readonly SymfonyStyle $io;
 
-    private array $allSuites;
+    private array $allCards;
     private TransformerInterface $transformer;
 
     protected function configure(): void
@@ -47,61 +47,61 @@ final class EvaluateCommand extends Command
             ->setHelp(<<<HELP
 The <info>%command.name%</info> command evaluates a poker hand.
 
-Pass in the suites as a space separated list, with a list of $maxCards cards.
+Pass in the cards as a space separated list, with a list of $maxCards cards.
 
 Use the shorthand notation for a card, E.G. 2H for 2 of Hearts.
 
 <info>php %command.full_name% 2H KC 4D 10S AH</info>
 HELP)
             ->addArgument(
-                name: 'suites',
+                name: 'cards',
                 mode: InputArgument::IS_ARRAY,
-                description: 'The suites to evaluate. Use shorthand notation for each suite (E.G 2H for 2 of Hearts)',
+                description: 'The cards to evaluate. Use shorthand notation for each card (E.G 2H for 2 of Hearts)',
             );
     }
 
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new SymfonyStyle($input, $output);
-        $this->transformer = new ShortStringToSuiteTransformer();
+        $this->transformer = new ShortStringToCardTransformer();
 
-        $suites = array_merge(
+        $cards = array_merge(
             Spade::cases(),
             Diamond::cases(),
             Heart::cases(),
             Club::cases(),
         );
 
-        $this->allSuites = array_combine(
-            array_map(static fn(Suite $suite) => $suite->toShortString(), $suites),
-            $suites
+        $this->allCards = array_combine(
+            array_map(static fn(Card $card) => $card->toShortString(), $cards),
+            $cards
         );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            PokerHandValidator::validate(...$input->getArgument('suites'));
+            PokerHandValidator::validate(...$input->getArgument('cards'));
         } catch (PokerHandsException $e) {
             $this->io->error($e->getMessage());
 
             return self::FAILURE;
         }
 
-        $selectedSuites = $this->transformer->transformArray($input->getArgument('suites'));
+        $selectedCards = $this->transformer->transformArray($input->getArgument('cards'));
 
         $this->io->title('You chose the following cards:');
 
         $this->io->listing(
             array_map(
-                static fn (Suite $suite) => $suite->toString(),
-                $selectedSuites
+                static fn (Card $card) => $card->toString(),
+                $selectedCards
             )
         );
 
         $this->io->title('The highest hand you have is:');
         $this->io->block(
-            (new PokerHandsEvaluate(...$selectedSuites))
+            (new PokerHandsEvaluate(...$selectedCards))
                 ->getHighestRank()
                 ->toString()
         );
@@ -111,7 +111,7 @@ HELP)
 
     protected function interact(InputInterface $input, OutputInterface $output): void
     {
-        $options = $input->getArgument('suites');
+        $options = $input->getArgument('cards');
 
         if (count($options) > PokerHandValidator::MAX_CARDS) {
             return;
@@ -119,7 +119,7 @@ HELP)
 
         // Create initial set of choices, removing any choices already passed in as arguments
         $choices = array_diff_key(
-            array_map(static fn(Suite $suite) => $suite->toString(), $this->allSuites),
+            array_map(static fn(Card $card) => $card->toString(), $this->allCards),
             array_flip($options)
         );
 
@@ -146,6 +146,6 @@ HELP)
             $choices = array_diff_key($choices, array_flip($options));
         }
 
-        $input->setArgument('suites', $options);
+        $input->setArgument('cards', $options);
     }
 }

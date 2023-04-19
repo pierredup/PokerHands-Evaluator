@@ -5,7 +5,7 @@ namespace Rsaweb\Poker\Contracts;
 
 use BackedEnum;
 
-interface Suite extends BackedEnum
+interface Card extends BackedEnum
 {
     public function toString(): string;
     public function toShortString(): string;

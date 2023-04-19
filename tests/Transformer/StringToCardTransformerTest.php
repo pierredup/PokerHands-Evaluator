@@ -4,33 +4,33 @@ declare(strict_types=1);
 namespace Rsaweb\Poker\Tests\Transformer;
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use Rsaweb\Poker\Contracts\Suite;
+use Rsaweb\Poker\Contracts\Card;
 use Rsaweb\Poker\Enum\Club;
 use Rsaweb\Poker\Enum\Diamond;
 use Rsaweb\Poker\Enum\Heart;
 use Rsaweb\Poker\Enum\Spade;
 use Rsaweb\Poker\Exception\InvalidCardException;
-use Rsaweb\Poker\Transformer\ShortStringToSuiteTransformer;
+use Rsaweb\Poker\Transformer\ShortStringToCardTransformer;
 use PHPUnit\Framework\TestCase;
 
-/** @covers \Rsaweb\Poker\Transformer\ShortStringToSuiteTransformer */
-final class StringToSuiteTransformerTest extends TestCase
+/** @covers \Rsaweb\Poker\Transformer\ShortStringToCardTransformer */
+final class StringToCardTransformerTest extends TestCase
 {
-    private ShortStringToSuiteTransformer $transformer;
+    private ShortStringToCardTransformer $transformer;
 
     protected function setUp(): void
     {
-        $this->transformer = new ShortStringToSuiteTransformer();
+        $this->transformer = new ShortStringToCardTransformer();
     }
 
-    #[DataProvider('provideValidSuite')]
-    public function testTransformWithValidSuites(string $key, Suite $suite): void
+    #[DataProvider('provideValidCard')]
+    public function testTransformWithValidCards(string $key, Card $card): void
     {
-        self::assertSame($suite, $this->transformer->transform($key));
+        self::assertSame($card, $this->transformer->transform($key));
     }
 
-    #[DataProvider('provideInvalidSuite')]
-    public function testTransformWithInvalidSuites(string $key): void
+    #[DataProvider('provideInvalidCard')]
+    public function testTransformWithInvalidCards(string $key): void
     {
         $this->expectException(InvalidCardException::class);
         $this->expectExceptionMessage('The following cards are invalid: ' . $key);
@@ -40,8 +40,8 @@ final class StringToSuiteTransformerTest extends TestCase
 
     public function testTransformArrayWithValidCards(): void
     {
-        $cards = ['2H', '3D', '10C', 'AS', 'KC'];
-        $suites = [
+        $shortStringCards = ['2H', '3D', '10C', 'AS', 'KC'];
+        $cards = [
             Heart::Two,
             Diamond::Three,
             Club::Ten,
@@ -49,7 +49,7 @@ final class StringToSuiteTransformerTest extends TestCase
             Club::King,
         ];
 
-        self::assertSame($suites, $this->transformer->transformArray($cards));
+        self::assertSame($cards, $this->transformer->transformArray($shortStringCards));
     }
 
     public function testTransformArrayWithInvalidCards(): void
@@ -61,7 +61,7 @@ final class StringToSuiteTransformerTest extends TestCase
         $this->transformer->transformArray($cards);
     }
 
-    public static function provideValidSuite(): iterable
+    public static function provideValidCard(): iterable
     {
         yield ['2H', Heart::Two];
         yield ['3D', Diamond::Three];
@@ -70,7 +70,7 @@ final class StringToSuiteTransformerTest extends TestCase
         yield ['KC', Club::King];
     }
 
-    public static function provideInvalidSuite(): iterable
+    public static function provideInvalidCard(): iterable
     {
         yield ['2'];
         yield ['D'];

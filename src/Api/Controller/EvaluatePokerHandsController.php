@@ -6,7 +6,7 @@ namespace Rsaweb\Poker\Api\Controller;
 use JsonException;
 use Rsaweb\Poker\Evaluate\PokerHandsEvaluate;
 use Rsaweb\Poker\Exception\PokerHandsException;
-use Rsaweb\Poker\Transformer\ShortStringToSuiteTransformer;
+use Rsaweb\Poker\Transformer\ShortStringToCardTransformer;
 use Rsaweb\Poker\Validator\PokerHandValidator;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,7 +22,7 @@ final class EvaluatePokerHandsController
     ];
 
     /**
-     * @param array{suites: string} $args
+     * @param array{cards: string} $args
      * @return array{rank: string}
      */
     public function __invoke(Request $request, array $args): array
@@ -33,20 +33,20 @@ final class EvaluatePokerHandsController
             throw new BadRequestException('Invalid JSON', $e->getCode(), $e);
         }
 
-        if (!isset($body['suites']) || !is_array($body['suites'])) {
-            throw new BadRequestException('Invalid Request: expected \'suites\' key with an array of suites');
+        if (!isset($body['cards']) || !is_array($body['cards'])) {
+            throw new BadRequestException('Invalid Request: expected \'cards\' key with an array of cards');
         }
 
         try {
-            PokerHandValidator::validate(...$body['suites']);
+            PokerHandValidator::validate(...$body['cards']);
         } catch (PokerHandsException $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $transformer = new ShortStringToSuiteTransformer();
+        $transformer = new ShortStringToCardTransformer();
 
         $evaluator = new PokerHandsEvaluate(
-            ...$transformer->transformArray($body['suites'])
+            ...$transformer->transformArray($body['cards'])
         );
 
         return [
