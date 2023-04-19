@@ -59,4 +59,15 @@ final class ShortStringToSuiteTransformer implements TransformerInterface
 
         return $this->allSuites[$suite];
     }
+
+    /**
+     * @param list<string> $suites
+     * @return list<Suite>
+     *
+     * @throws InvalidCardException
+     */
+    public function transformArray(array $suites): array
+    {
+        return array_map($this->transform(...), $suites);
+    }
 }

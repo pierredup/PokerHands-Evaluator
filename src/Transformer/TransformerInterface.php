@@ -12,4 +12,12 @@ interface TransformerInterface
      * @throws InvalidCardException
      */
     public function transform(string $suite): Suite;
+
+    /**
+     * @param list<string> $suites
+     * @return list<Suite>
+     *
+     * @throws InvalidCardException
+     */
+    public function transformArray(array $suites): array;
 }

@@ -46,10 +46,7 @@ final class EvaluatePokerHandsController
         $transformer = new ShortStringToSuiteTransformer();
 
         $evaluator = new PokerHandsEvaluate(
-            ...array_map(
-                $transformer->transform(...),
-                $body['suites']
-            )
+            ...$transformer->transformArray($body['suites'])
         );
 
         return [

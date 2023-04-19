@@ -9,8 +9,7 @@ use Rsaweb\Poker\Enum\Diamond;
 use Rsaweb\Poker\Enum\Heart;
 use Rsaweb\Poker\Enum\Spade;
 use Rsaweb\Poker\Evaluate\PokerHandsEvaluate;
-use Rsaweb\Poker\Exception\InvalidCardException;
-use Rsaweb\Poker\Exception\NonUniqueCardsException;
+use Rsaweb\Poker\Exception\PokerHandsException;
 use Rsaweb\Poker\Transformer\ShortStringToSuiteTransformer;
 use Rsaweb\Poker\Transformer\TransformerInterface;
 use Rsaweb\Poker\Validator\PokerHandValidator;
@@ -83,16 +82,13 @@ HELP)
     {
         try {
             PokerHandValidator::validate(...$input->getArgument('suites'));
-        } catch (NonUniqueCardsException | InvalidCardException $e) {
+        } catch (PokerHandsException $e) {
             $this->io->error($e->getMessage());
 
             return self::FAILURE;
         }
 
-        $selectedSuites = array_map(
-            $this->transformer->transform(...),
-            $input->getArgument('suites')
-        );
+        $selectedSuites = $this->transformer->transformArray($input->getArgument('suites'));
 
         $this->io->title('You chose the following cards:');
 

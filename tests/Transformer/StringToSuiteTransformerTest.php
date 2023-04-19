@@ -38,6 +38,29 @@ final class StringToSuiteTransformerTest extends TestCase
         $this->transformer->transform($key);
     }
 
+    public function testTransformArrayWithValidCards(): void
+    {
+        $cards = ['2H', '3D', '10C', 'AS', 'KC'];
+        $suites = [
+            Heart::Two,
+            Diamond::Three,
+            Club::Ten,
+            Spade::Ace,
+            Club::King,
+        ];
+
+        self::assertSame($suites, $this->transformer->transformArray($cards));
+    }
+
+    public function testTransformArrayWithInvalidCards(): void
+    {
+        $cards = ['2H', '3D', '10C', 'AS', 'KA'];
+        $this->expectException(InvalidCardException::class);
+        $this->expectExceptionMessage('The following cards are invalid: KA');
+
+        $this->transformer->transformArray($cards);
+    }
+
     public static function provideValidSuite(): iterable
     {
         yield ['2H', Heart::Two];
