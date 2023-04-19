@@ -16,6 +16,11 @@ use const JSON_THROW_ON_ERROR;
 
 final class EvaluatePokerHandsController
 {
+    public const ROUTE_PARAMS = [
+        'method' => 'POST',
+        'path' => '/api',
+    ];
+
     /**
      * @param array{suites: string} $args
      * @return array{rank: string}
