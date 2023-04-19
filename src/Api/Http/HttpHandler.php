@@ -10,9 +10,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
-use function array_merge;
-use function json_decode;
-use const JSON_THROW_ON_ERROR;
 
 final readonly class HttpHandler
 {
@@ -53,15 +50,7 @@ final readonly class HttpHandler
         [, $handler, $vars] = $routeInfo;
 
         try {
-            $body = json_decode(
-                json: $this->request->getContent(),
-                associative: true,
-                flags: JSON_THROW_ON_ERROR
-            );
-
-            $vars = array_merge($vars, $body);
-
-            return $this->getResponse($handler($vars), Response::HTTP_OK);
+            return $this->getResponse($handler($this->request, $vars), Response::HTTP_OK);
         } catch (JsonException) {
             return $this->getResponse(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
         } catch (BadRequestException $e) {
