@@ -11,6 +11,7 @@ use Rsaweb\Poker\Enum\Spade;
 use Rsaweb\Poker\Evaluate\PokerHandsEvaluate;
 use Rsaweb\Poker\Exception\InvalidCardException;
 use Rsaweb\Poker\Exception\NonUniqueCardsException;
+use Rsaweb\Poker\Transformer\StringToSuiteTransformer;
 use Rsaweb\Poker\Validator\PokerHandValidator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -35,13 +36,8 @@ final class EvaluateCommand extends Command
 {
     private readonly SymfonyStyle $io;
 
-    /**
-     * A map of all the suites converted to string with the short notation as the key
-     * E.G. ['2H' => 'Two of Hearts']
-     *
-     * @var array<string, Suite>
-     */
     private array $allSuites;
+    private StringToSuiteTransformer $transformer;
 
     protected function configure(): void
     {
@@ -67,6 +63,7 @@ HELP)
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new SymfonyStyle($input, $output);
+        $this->transformer = new StringToSuiteTransformer();
 
         $suites = array_merge(
             Spade::cases(),
@@ -91,24 +88,26 @@ HELP)
             return self::FAILURE;
         }
 
-        $evaluate = new PokerHandsEvaluate(
-            ...array_map(
-                fn(string $suite) => $this->allSuites[$suite],
-                $input->getArgument('suites')
-            )
+        $selectedSuites = array_map(
+            $this->transformer->transform(...),
+            $input->getArgument('suites')
         );
 
         $this->io->title('You chose the following cards:');
 
         $this->io->listing(
             array_map(
-                fn(string $suite) => $this->allSuites[$suite]->toString(),
-                $input->getArgument('suites')
+                static fn (Suite $suite) => $suite->toString(),
+                $selectedSuites
             )
         );
 
         $this->io->title('The highest hand you have is:');
-        $this->io->block($evaluate->getHighestRank()->toString());
+        $this->io->block(
+            (new PokerHandsEvaluate(...$selectedSuites))
+                ->getHighestRank()
+                ->toString()
+        );
 
         return self::SUCCESS;
     }
