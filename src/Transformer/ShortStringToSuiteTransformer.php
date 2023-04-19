@@ -14,7 +14,7 @@ use function array_map;
 use function array_merge;
 use function in_array;
 
-final class StringToSuiteTransformer
+final class ShortStringToSuiteTransformer implements TransformerInterface
 {
     /**
      * A map of all the suites converted to string with the short notation as the key

@@ -10,17 +10,17 @@ use Rsaweb\Poker\Enum\Diamond;
 use Rsaweb\Poker\Enum\Heart;
 use Rsaweb\Poker\Enum\Spade;
 use Rsaweb\Poker\Exception\InvalidCardException;
-use Rsaweb\Poker\Transformer\StringToSuiteTransformer;
+use Rsaweb\Poker\Transformer\ShortStringToSuiteTransformer;
 use PHPUnit\Framework\TestCase;
 
-/** @covers \Rsaweb\Poker\Transformer\StringToSuiteTransformer */
+/** @covers \Rsaweb\Poker\Transformer\ShortStringToSuiteTransformer */
 final class StringToSuiteTransformerTest extends TestCase
 {
-    private StringToSuiteTransformer $transformer;
+    private ShortStringToSuiteTransformer $transformer;
 
     protected function setUp(): void
     {
-        $this->transformer = new StringToSuiteTransformer();
+        $this->transformer = new ShortStringToSuiteTransformer();
     }
 
     #[DataProvider('provideValidSuite')]

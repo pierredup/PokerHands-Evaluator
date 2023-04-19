@@ -11,7 +11,8 @@ use Rsaweb\Poker\Enum\Spade;
 use Rsaweb\Poker\Evaluate\PokerHandsEvaluate;
 use Rsaweb\Poker\Exception\InvalidCardException;
 use Rsaweb\Poker\Exception\NonUniqueCardsException;
-use Rsaweb\Poker\Transformer\StringToSuiteTransformer;
+use Rsaweb\Poker\Transformer\ShortStringToSuiteTransformer;
+use Rsaweb\Poker\Transformer\TransformerInterface;
 use Rsaweb\Poker\Validator\PokerHandValidator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -37,7 +38,7 @@ final class EvaluateCommand extends Command
     private readonly SymfonyStyle $io;
 
     private array $allSuites;
-    private StringToSuiteTransformer $transformer;
+    private TransformerInterface $transformer;
 
     protected function configure(): void
     {
@@ -63,7 +64,7 @@ HELP)
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new SymfonyStyle($input, $output);
-        $this->transformer = new StringToSuiteTransformer();
+        $this->transformer = new ShortStringToSuiteTransformer();
 
         $suites = array_merge(
             Spade::cases(),
