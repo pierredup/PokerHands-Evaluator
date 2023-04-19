@@ -4,8 +4,11 @@ declare(strict_types=1);
 namespace Rsaweb\Poker\Api\Controller;
 
 use Rsaweb\Poker\Evaluate\PokerHandsEvaluate;
+use Rsaweb\Poker\Exception\PokerHandsException;
 use Rsaweb\Poker\Transformer\ShortStringToSuiteTransformer;
 use Rsaweb\Poker\Validator\PokerHandValidator;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use function is_array;
 
 final class EvaluatePokerHandsController
 {
@@ -15,7 +18,15 @@ final class EvaluatePokerHandsController
      */
     public function __invoke(array $args): array
     {
-        PokerHandValidator::validate(...$args['suites']);
+        if (!isset($args['suites']) || !is_array($args['suites'])) {
+            throw new BadRequestException('Invalid Request: expected \'suites\' key with an array of suites');
+        }
+
+        try {
+            PokerHandValidator::validate(...$args['suites']);
+        } catch (PokerHandsException $e) {
+            throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
+        }
 
         $transformer = new ShortStringToSuiteTransformer();
 
